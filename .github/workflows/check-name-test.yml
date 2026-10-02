@@ -1,0 +1,28 @@
+name: Check name test
+
+on:
+  pull_request_target:
+    types: [labeled]
+
+jobs:
+  analyze:
+    name: ${{ github.event.label.name == 'open source' && 'analyze' || 'analyze (ignored event)' }}
+    if: github.event.label.name == 'open source'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo analyze
+
+  apply:
+    name: ${{ github.event.label.name == 'open source' && 'apply' || 'apply (ignored event)' }}
+    needs: analyze
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo apply
+
+  record-error:
+    name: ${{ github.event.label.name == 'open source' && 'record-error' || 'record-error (ignored event)' }}
+    needs: [analyze, apply]
+    if: always() && github.event.label.name == 'open source' && needs.apply.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo record
